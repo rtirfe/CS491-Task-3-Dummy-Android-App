@@ -1,14 +1,37 @@
 package com.example.robel.testideavim;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.StrictMode;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
 
 //TODO test hooking getSystemService(Context.CONNECTIVITY_SERVICE);
 //android.content.ContextWrapper.getApplicationContext();
@@ -16,17 +39,32 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private int count = 0;
-    Button crackButtion;
-    StringBuilder myNetworkStatus = new StringBuilder();
+    private Button crackButtion;
+    private StringBuilder myNetworkStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
+        try {
+            URL url = new URL("http://www.android.com/");
+            setUpHttpConnection(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        myNetworkStatus.append("Network hasConnection: ");
-        myNetworkStatus.append(this.hasInternetConnection().toString());
-        Toast.makeText(getApplicationContext(),this.getActiveNetwork(),Toast.LENGTH_LONG).show();
+
+        setContentView(R.layout.activity_main);
+        Context context = getApplicationContext();
+        TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+
+        myNetworkStatus = new StringBuilder("Network hasConnection: " + this.hasInternetConnection());
+        Toast.makeText(context,myNetworkStatus.toString() + ":" + this.getActiveNetwork(),Toast.LENGTH_LONG).show();
 
         crackButtion= (Button)findViewById(R.id.button2);
         crackButtion.setOnClickListener(new View.OnClickListener() {
@@ -37,13 +75,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
     private void setOutput(int i){
-       if (i == 1) {
-           Toast.makeText(getApplicationContext(),"Cracked",Toast.LENGTH_LONG).show();
-       }
-       else {
+        if (i == 1) {
+            Toast.makeText(getApplicationContext(),"Cracked",Toast.LENGTH_LONG).show();
+        }
+        else {
             Toast.makeText(getApplicationContext(),"You can't crack it",Toast.LENGTH_LONG).show();
-       }
+        }
     }
 
     private Boolean hasInternetConnection(){
@@ -60,17 +99,55 @@ public class MainActivity extends AppCompatActivity {
 
     private String getActiveNetwork(){
         if (hasInternetConnection().toString().equals("false") )
-                return "No internet connection at this moment.";
+            return "No internet connection at this moment.";
 
         else {
             Context context = getApplicationContext();
             ConnectivityManager cm ;
             cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-            NetworkInfo activeNetwork ;
+            NetworkInfo activeNetwork;
             activeNetwork = cm.getActiveNetworkInfo();
             String type = activeNetwork.getTypeName();
             return type;
         }
     }
+
+    private String setUpHttpConnection(URL url) throws IOException {
+//        URL url = new URL("http://www.example.com/");
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        String host = url.getHost();
+        System.out.println("\n\thost is: " + host +
+                "\n\tport is: " + url.getPort() +
+                "\n\tProtocol is:" + url.getProtocol() +
+                "\n\tUserInfor is:" + url.getUserInfo() +
+                "\n\tQuery is: " + url.getQuery());
+        try {
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+
+            readStream(in);
+        } finally {
+            urlConnection.disconnect();
+        } 
+        return null;
+    }
+
+    private void readStream(InputStream in) {
+        System.out.println("Inside readStream " + in.toString());
+        InputStreamReader isw = new InputStreamReader(in);
+        int data = 0;
+        try {
+            data = isw.read();
+            while (data != -1) {
+                char current = (char) data;
+                data = isw.read();
+                System.out.print(current);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
+
