@@ -1,28 +1,15 @@
 package com.example.robel.testideavim;
 
-import android.Manifest;
-import android.accessibilityservice.AccessibilityService;
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.StrictMode;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.StrictMode;
+import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -31,11 +18,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-
-//TODO test hooking getSystemService(Context.CONNECTIVITY_SERVICE);
-//android.content.ContextWrapper.getApplicationContext();
-//"com.android.inputmethod.keyboard"
 
 public class MainActivity extends AppCompatActivity {
     private int count = 0;
@@ -66,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         myNetworkStatus = new StringBuilder("Network hasConnection: " + this.hasInternetConnection());
         Toast.makeText(context,myNetworkStatus.toString() + ":" + this.getActiveNetwork(),Toast.LENGTH_LONG).show();
 
-        crackButtion= (Button)findViewById(R.id.button2);
+        crackButtion= findViewById(R.id.button2);
         crackButtion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String setUpHttpConnection(URL url) throws IOException {
-//        URL url = new URL("http://www.example.com/");
+    //URL url = new URL("http://www.example.com/");
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         String host = url.getHost();
         System.out.println("\n\thost is: " + host +
